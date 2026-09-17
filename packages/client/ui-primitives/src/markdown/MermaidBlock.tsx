@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import clsx from 'clsx'
 import { CodeBlock } from './CodeBlock.tsx'
+import { Switch } from '../Switch.tsx'
 import { ensureMermaid, mermaidLoadState, renderMermaid, subscribeMermaidLoaded } from './mermaid.ts'
 import type { MermaidToolbarLabels } from './mermaid-labels.ts'
 import { IconDownloadOutline16, IconMinusOutline16, IconPlusOutline16, IconRefreshOutline16 } from '../icons/index.tsx'
@@ -9,7 +10,7 @@ import css from './MermaidBlock.module.css'
 export interface MermaidBlockProps {
   /** The Mermaid diagram source (fence body), rendered once settled. */
   source: string
-  /** Copy-button idle label for the error fallback's source block. */
+  /** Copy-button idle label for the source view and error fallback. */
   copyLabel: string
   /** Copy-button label during the post-copy confirmation window. */
   copiedLabel: string
@@ -20,7 +21,7 @@ export interface MermaidBlockProps {
    */
   errorLabel?: string | undefined
   /**
-   * Zoom/save toolbar chrome. Absent, the diagram renders without the
+   * Diagram/source and zoom/save toolbar chrome. Absent, the diagram renders without the
    * toolbar; present, every control is labeled.
    */
   toolbar?: MermaidToolbarLabels | undefined
@@ -53,7 +54,8 @@ const ZOOM_STEP = 1.25
  * carries a zoom/save toolbar: zoom scales the SVG with a CSS transform
  * inside a scrollable viewport (so an enlarged diagram pans by scrolling),
  * reset returns to 100%, and save downloads XML-serialized SVG, preserving
- * XHTML label namespaces and line breaks.
+ * XHTML label namespaces and line breaks. The Source switch shows copyable
+ * Mermaid code without discarding the diagram or its zoom and scroll state.
  */
 export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolbar }: MermaidBlockProps) {
   // Kick the lazy import; the snapshot moves off `loading` when it settles.
@@ -61,6 +63,7 @@ export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolb
   const loadState = useSyncExternalStore(subscribeMermaidLoaded, mermaidLoadState, mermaidLoadState)
   const [outcome, setOutcome] = useState<Outcome>({ status: 'rendering' })
   const [zoom, setZoom] = useState(1)
+  const [showSource, setShowSource] = useState(false)
   const diagramRef = useRef<HTMLDivElement>(null)
   // A diagram renders once per distinct source; a re-render with the same
   // source must not re-run Mermaid (its output is deterministic), and a new
@@ -110,26 +113,39 @@ export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolb
         <div className={css.diagramWrap}>
           {toolbar !== undefined && (
             <div className={css.toolbar}>
-              <button type="button" className={css.toolButton} aria-label={toolbar.zoomOut} title={toolbar.zoomOut}
-                onClick={() => { zoomBy(1 / ZOOM_STEP) }} disabled={zoom <= ZOOM_MIN}>
-                <IconMinusOutline16 />
-              </button>
-              <span className={css.zoomValue}>{Math.round(zoom * 100)}%</span>
-              <button type="button" className={css.toolButton} aria-label={toolbar.zoomIn} title={toolbar.zoomIn}
-                onClick={() => { zoomBy(ZOOM_STEP) }} disabled={zoom >= ZOOM_MAX}>
-                <IconPlusOutline16 />
-              </button>
-              <button type="button" className={css.toolButton} aria-label={toolbar.resetZoom} title={toolbar.resetZoom}
-                onClick={resetZoom} disabled={zoom === 1}>
-                <IconRefreshOutline16 />
-              </button>
-              <button type="button" className={css.toolButton} aria-label={toolbar.save} title={toolbar.save}
-                onClick={save}>
-                <IconDownloadOutline16 />
-              </button>
+              {!showSource && <>
+                <button type="button" className={css.toolButton} aria-label={toolbar.zoomOut} title={toolbar.zoomOut}
+                  onClick={() => { zoomBy(1 / ZOOM_STEP) }} disabled={zoom <= ZOOM_MIN}>
+                  <IconMinusOutline16 />
+                </button>
+                <span className={css.zoomValue}>{Math.round(zoom * 100)}%</span>
+                <button type="button" className={css.toolButton} aria-label={toolbar.zoomIn} title={toolbar.zoomIn}
+                  onClick={() => { zoomBy(ZOOM_STEP) }} disabled={zoom >= ZOOM_MAX}>
+                  <IconPlusOutline16 />
+                </button>
+                <button type="button" className={css.toolButton} aria-label={toolbar.resetZoom} title={toolbar.resetZoom}
+                  onClick={resetZoom} disabled={zoom === 1}>
+                  <IconRefreshOutline16 />
+                </button>
+                <button type="button" className={css.toolButton} aria-label={toolbar.save} title={toolbar.save}
+                  onClick={save}>
+                  <IconDownloadOutline16 />
+                </button>
+              </>}
+              <label className={css.sourceSwitch}>
+                <span>{toolbar.source}</span>
+                <Switch checked={showSource} onChange={setShowSource} label={toolbar.source} />
+              </label>
             </div>
           )}
-          <div className={css.viewport}>
+          {showSource && <CodeBlock
+            className={css.source}
+            code={`${source}\n`}
+            lang="mermaid"
+            copyLabel={copyLabel}
+            copiedLabel={copiedLabel}
+          />}
+          <div className={css.viewport} hidden={showSource}>
             <div
               ref={diagramRef}
               className={css.diagram}
@@ -154,7 +170,7 @@ export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolb
       )
     }
     return <div className={css.loading} aria-hidden="true" />
-  }, [outcome, loadState, source, copyLabel, copiedLabel, errorLabel, toolbar, zoom, zoomBy, resetZoom, save])
+  }, [outcome, loadState, source, copyLabel, copiedLabel, errorLabel, toolbar, zoom, showSource, zoomBy, resetZoom, save])
 
   return <div className={clsx(css.block, 'md-mermaid-block')}>{body}</div>
 }

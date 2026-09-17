@@ -55,7 +55,7 @@ export interface MarkdownMermaidLabels {
   /** Caption shown above the source block when a diagram fails to render. */
   error: string
   /**
-   * Zoom/save toolbar chrome. When the whole group is absent the diagram
+   * Source/zoom/save toolbar chrome. When the whole group is absent the diagram
    * renders without the toolbar; when present, every control is labeled.
    */
   toolbar?: MermaidToolbarLabels | undefined

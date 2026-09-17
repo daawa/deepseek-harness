@@ -1,0 +1,14 @@
+- button "Zoom out":
+  - img
+- text: 125%
+- button "Zoom in":
+  - img
+- button "Reset zoom":
+  - img
+- button "Save diagram":
+  - img
+- text: Source
+- switch "Source"
+- document:
+  - paragraph: Input source
+  - paragraph: Rendered diagram

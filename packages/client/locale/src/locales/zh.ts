@@ -36,6 +36,7 @@ export const zh = {
   'markdown.footnotes': '脚注',
   'markdown.truncatedCharacters': '… 已截断，共 {total} 字符',
   'markdown.mermaid.error': '无法渲染此图表',
+  'markdown.mermaid.source': '源码',
   'markdown.mermaid.zoomOut': '缩小',
   'markdown.mermaid.zoomIn': '放大',
   'markdown.mermaid.resetZoom': '重置缩放',

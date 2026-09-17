@@ -1,0 +1,14 @@
+- button "缩小":
+  - img
+- text: 125%
+- button "放大":
+  - img
+- button "重置缩放":
+  - img
+- button "保存图表":
+  - img
+- text: 源码
+- switch "源码"
+- document:
+  - paragraph: Input source
+  - paragraph: Rendered diagram

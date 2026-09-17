@@ -15,6 +15,7 @@ export function markdownLabels(t: ChatViewSlotProps['t']): MarkdownLabels {
     mermaid: {
       error: t('markdown.mermaid.error'),
       toolbar: {
+        source: t('markdown.mermaid.source'),
         zoomOut: t('markdown.mermaid.zoomOut'),
         zoomIn: t('markdown.mermaid.zoomIn'),
         resetZoom: t('markdown.mermaid.resetZoom'),

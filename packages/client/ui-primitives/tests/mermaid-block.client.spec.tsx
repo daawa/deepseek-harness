@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MermaidBlock } from '../src/markdown/MermaidBlock.tsx'
 
@@ -92,7 +92,7 @@ describe('MermaidBlock', () => {
   })
 
   describe('toolbar', () => {
-    const toolbar = { zoomOut: 'Zoom out', zoomIn: 'Zoom in', resetZoom: 'Reset zoom', save: 'Save diagram' }
+    const toolbar = { source: 'Source', zoomOut: 'Zoom out', zoomIn: 'Zoom in', resetZoom: 'Reset zoom', save: 'Save diagram' }
 
     async function renderWithToolbar(svg = '<svg viewBox="0 0 100 40"><text>diagram</text></svg>') {
       renderMermaidMock.mockResolvedValue({ svg, diagramType: 'flowchart' })
@@ -123,6 +123,55 @@ describe('MermaidBlock', () => {
         expect(container.querySelector('.md-mermaid-block svg')).not.toBeNull()
       })
       expect(screen.queryByRole('button', { name: 'Zoom in' })).toBeNull()
+      expect(screen.queryByRole('switch')).toBeNull()
+    })
+
+    it.each(['Source', '源码'])('toggles %s without losing the diagram or zoom', async (label) => {
+      renderMermaidMock.mockResolvedValue({ svg: '<svg role="img" aria-label="diagram"><text>diagram</text></svg>', diagramType: 'flowchart' })
+      const source = 'graph TD\n  A["<b>literal</b>"] --> B\n\n'
+      const { container } = render(
+        <MermaidBlock source={source} copyLabel="Copy" copiedLabel="Copied" toolbar={{ ...toolbar, source: label }} />,
+      )
+      const diagram = await screen.findByRole('img', { name: 'diagram' })
+      const toggle = screen.getByRole('switch', { name: label, checked: false })
+      expect(container.querySelector('pre')).toBeNull()
+      fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }))
+      fireEvent.click(toggle)
+      expect(toggle.getAttribute('aria-checked')).toBe('true')
+      expect(screen.queryByRole('img', { name: 'diagram' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Zoom in' })).toBeNull()
+      expect(screen.queryByRole('button', { name: 'Save diagram' })).toBeNull()
+      expect(container.querySelector('pre')?.textContent).toBe(source)
+      expect(container.querySelector('pre b')).toBeNull()
+      expect(screen.getByRole('button', { name: 'Copy' })).toBeTruthy()
+      fireEvent.click(toggle)
+      expect(toggle.getAttribute('aria-checked')).toBe('false')
+      expect(screen.getByRole('img', { name: 'diagram' })).toBe(diagram)
+      expect(container.querySelector('pre')).toBeNull()
+      expect(screen.getByText('125%')).toBeTruthy()
+      expect(renderMermaidMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('copies the original source including trailing blank lines', async () => {
+      const source = 'graph TD\n  A --> B\n\n'
+      const descriptor = Object.getOwnPropertyDescriptor(navigator, 'clipboard')
+      const writeText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue(undefined)
+      try {
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+        renderMermaidMock.mockResolvedValue({ svg: '<svg><text>diagram</text></svg>', diagramType: 'flowchart' })
+        render(<MermaidBlock source={source} copyLabel="Copy" copiedLabel="Copied" toolbar={toolbar} />)
+        fireEvent.click(await screen.findByRole('switch', { name: 'Source' }))
+        vi.useFakeTimers()
+        await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Copy' })) })
+        expect(writeText).toHaveBeenCalledWith(source)
+        expect(screen.getByRole('button', { name: 'Copied' })).toBeTruthy()
+        await act(async () => { await vi.runOnlyPendingTimersAsync() })
+      } finally {
+        cleanup()
+        vi.useRealTimers()
+        if (descriptor === undefined) Reflect.deleteProperty(navigator, 'clipboard')
+        else Object.defineProperty(navigator, 'clipboard', descriptor)
+      }
     })
 
     it('zooms in and out with the buttons and resets to 100%', async () => {

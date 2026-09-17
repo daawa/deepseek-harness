@@ -38,6 +38,7 @@ export const en = {
   'markdown.footnotes': 'Footnotes',
   'markdown.truncatedCharacters': '… truncated at {total} characters',
   'markdown.mermaid.error': 'Could not render this diagram',
+  'markdown.mermaid.source': 'Source',
   'markdown.mermaid.zoomOut': 'Zoom out',
   'markdown.mermaid.zoomIn': 'Zoom in',
   'markdown.mermaid.resetZoom': 'Reset zoom',

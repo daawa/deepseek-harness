@@ -49,6 +49,23 @@
   cursor: default;
 }
 
+.sourceSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  min-height: 24px;
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-xs-13);
+  cursor: pointer;
+}
+
+.source:global(.md-code-block) {
+  margin: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
 .zoomValue {
   min-width: 44px;
   text-align: center;

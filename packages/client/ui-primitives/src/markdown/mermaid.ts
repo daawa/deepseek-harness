@@ -7,6 +7,8 @@
  * generated markup — Mermaid output under `securityLevel: 'strict'` is a
  * sanitized SVG vocabulary with no raw user HTML.
  *
+ * ELK layouts register lazily alongside Mermaid; diagrams using Mermaid's
+ * shared layout selection default to ELK's layered algorithm.
  * The singleton initializes once with `startOnLoad: false` (this module
  * drives rendering explicitly), `securityLevel: 'strict'` (assistant output
  * is untrusted), and `suppressErrorRendering: true`: Mermaid otherwise leaves
@@ -68,9 +70,10 @@ export function ensureMermaid(): boolean {
   // The rejection handler absorbs the chunk-import error: the state is what
   // callers act on, and a rejected `loading` promise nobody awaits would
   // surface as an unhandled rejection.
-  loading ??= import('mermaid').then(
-    (mod) => {
-      mod.default.initialize({ startOnLoad: false, securityLevel: 'strict', suppressErrorRendering: true })
+  loading ??= Promise.all([import('mermaid'), import('@mermaid-js/layout-elk')]).then(
+    ([mod, elk]) => {
+      mod.default.registerLayoutLoaders(elk.default)
+      mod.default.initialize({ startOnLoad: false, securityLevel: 'strict', suppressErrorRendering: true, layout: 'elk' })
       ready = mod
       for (const listener of subscribers) listener()
     },
