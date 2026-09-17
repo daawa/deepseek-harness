@@ -23,6 +23,8 @@ import type * as Md from 'mdast'
 import type {} from 'mdast-util-math'
 import { normalizeUri } from 'micromark-util-sanitize-uri'
 import { CodeBlock } from './CodeBlock.tsx'
+import { MermaidBlock } from './MermaidBlock.tsx'
+import type { MermaidToolbarLabels } from './mermaid-labels.ts'
 import { renderTexToReact } from './katex.tsx'
 import { LinkIcon, classifyLinkPath } from '../LinkIcon.tsx'
 import type { PositionedBlock } from './incremental.ts'
@@ -40,6 +42,23 @@ export interface MarkdownCodeLabels {
 export interface MarkdownLabels {
   code: MarkdownCodeLabels
   footnotes: string
+  /**
+   * Optional Mermaid-diagram chrome. Absent, a failed diagram still falls
+   * back to its (fully labeled) source block, just without the explanatory
+   * caption.
+   */
+  mermaid?: MarkdownMermaidLabels | undefined
+}
+
+/** Localized chrome for Mermaid diagram blocks. */
+export interface MarkdownMermaidLabels {
+  /** Caption shown above the source block when a diagram fails to render. */
+  error: string
+  /**
+   * Zoom/save toolbar chrome. When the whole group is absent the diagram
+   * renders without the toolbar; when present, every control is labeled.
+   */
+  toolbar?: MermaidToolbarLabels | undefined
 }
 
 function sanitizeUrl(url: string): string {
@@ -377,6 +396,22 @@ function renderCode(node: Md.Code, key: Key, context: MarkdownRenderContext): Re
     // ```math fences render as display TeX once settled (rehype-katex parity);
     // its text extraction saw the code block's trailing newline.
     return <Fragment key={key}>{renderTexToReact(`${node.value}\n`, true)}</Fragment>
+  }
+  if (!context.streaming && lang === 'mermaid') {
+    // ```mermaid fences render as a diagram once settled; while streaming,
+    // the growing source stays an ordinary highlighted fence (TeX parity:
+    // incomplete input never flashes render errors), and a settled failure
+    // falls back to that same source block inside MermaidBlock.
+    return (
+      <MermaidBlock
+        key={key}
+        source={node.value}
+        copyLabel={context.labels.code.copyLabel}
+        copiedLabel={context.labels.code.copiedLabel}
+        errorLabel={context.labels.mermaid?.error}
+        toolbar={context.labels.mermaid?.toolbar}
+      />
+    )
   }
   return (
     <CodeBlock

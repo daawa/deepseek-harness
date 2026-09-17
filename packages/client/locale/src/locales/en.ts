@@ -37,6 +37,11 @@ export const en = {
   'json.label': 'JSON',
   'markdown.footnotes': 'Footnotes',
   'markdown.truncatedCharacters': '… truncated at {total} characters',
+  'markdown.mermaid.error': 'Could not render this diagram',
+  'markdown.mermaid.zoomOut': 'Zoom out',
+  'markdown.mermaid.zoomIn': 'Zoom in',
+  'markdown.mermaid.resetZoom': 'Reset zoom',
+  'markdown.mermaid.save': 'Save diagram',
   'number.thousand': '{value}K',
   'number.million': '{value}M',
 } satisfies Record<CommonKey, string>

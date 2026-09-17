@@ -1,9 +1,17 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { JsonBlock, MarkdownText } from './markdown-test-components.tsx'
 import { cjkFriendlyStrong } from '../src/markdown/cjkFriendlyStrong.ts'
 import { mathCompatibility } from '../src/markdown/mathCompatibility.ts'
+
+// Mermaid needs SVG layout APIs jsdom lacks; stub its render so the markdown
+// routing (settled diagram vs. streaming source) is what these tests pin.
+vi.mock('../src/markdown/mermaid.ts', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../src/markdown/mermaid.ts')>()
+  return { ...original, renderMermaid: vi.fn() }
+})
+import { renderMermaid } from '../src/markdown/mermaid.ts'
 
 afterEach(cleanup)
 
@@ -260,6 +268,22 @@ describe('MarkdownText', () => {
   it('forwards localized labels to fenced code blocks', () => {
     render(<MarkdownText text={'```ts\nconst answer = 42\n```'} codeLabels={{ copyLabel: 'Copy code', copiedLabel: 'Copied' }} />)
     expect(screen.getByRole('button', { name: 'Copy code' })).toBeTruthy()
+  })
+
+  it('renders a settled ```mermaid fence as a diagram and keeps it a source fence while streaming', async () => {
+    const renderMermaidMock = vi.mocked(renderMermaid)
+    renderMermaidMock.mockResolvedValue({ svg: '<svg><text>diagram</text></svg>', diagramType: 'flowchart' })
+    const fence = '```mermaid\ngraph TD; A-->B;\n```'
+    // Streaming: the growing source stays an ordinary fence, no diagram.
+    const live = render(<MarkdownText text={fence} streaming />)
+    expect(live.container.querySelector('.md-mermaid-block')).toBeNull()
+    expect(live.container.querySelector('pre')).not.toBeNull()
+    // Settled: the fence routes to MermaidBlock and renders the SVG.
+    live.rerender(<MarkdownText text={fence} />)
+    await waitFor(() => {
+      expect(live.container.querySelector('.md-mermaid-block svg')).not.toBeNull()
+    })
+    expect(renderMermaidMock).toHaveBeenCalledWith('graph TD; A-->B;')
   })
 
   it('renders absolute HTTP(S) images with bounded presentation', () => {

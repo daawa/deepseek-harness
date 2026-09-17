@@ -126,6 +126,16 @@ export const IconPlusOutline16 = ({ size = 16, className }: IconProps) => (
   </svg>
 )
 
+/** ic_ds_minus_outline_16 — the plus glyph's horizontal bar alone, for zoom-out. */
+export const IconMinusOutline16 = ({ size = 16, className }: IconProps) => (
+  <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M14.5 7.34961V8.65039H1.5V7.34961H14.5Z"
+      fill="currentColor"
+    />
+  </svg>
+)
+
 /** ic_ds_check_outline_16 */
 export const IconCheckOutline16 = ({ size = 16, className }: IconProps) => (
   <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">

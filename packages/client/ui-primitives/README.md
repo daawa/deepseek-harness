@@ -52,7 +52,7 @@ Check this table before writing a control in a feature package. A plugin cannot 
 | `HoverCard` | Hover preview the pointer can rest on and select from; optional copy button. |
 | `Toast` | Transient top-center banner held for the owner's `holdMs`. |
 | `JsonTree`, `JsonBlock` | Read-only JSON inspection. |
-| `MarkdownText`, `CodeBlock` | Untrusted GFM with TeX math, and highlighted code. `CodeBlock` accepts opt-in `lineNumbers`; copied source excludes the gutter, and `contentRef` exposes its stable source wrapper to an owner that uses it as a scrollport. Set `showHeader={false}` when the owner supplies its own language and copy toolbar. |
+| `MarkdownText`, `CodeBlock` | Untrusted GFM with TeX math, and highlighted code. `CodeBlock` accepts opt-in `lineNumbers`; copied source excludes the gutter, and `contentRef` exposes its stable source wrapper to an owner that uses it as a scrollport. Set `showHeader={false}` when the owner supplies its own language and copy toolbar. Settled ` ```mermaid ` fences render as diagrams through `MermaidBlock`; a render failure or a Mermaid chunk that never loads falls back to the source `CodeBlock`. When the owner supplies `MarkdownMermaidLabels.toolbar`, a rendered diagram carries a zoom (25%–400%, CSS scale in a scrollable viewport), reset, and save-as-`.svg` toolbar. Downloads preserve XHTML label namespaces and line breaks through XML serialization. |
 | `TerminalBlock`, `ReadBlock`, `DiffBlock`, `SearchBlock`, `WebBlock` | The agent-output card matching each tool-result intent. |
 | `icons/*`, `FishLogo`, `BrandWordmark`, `ReferenceIcon`, `LinkIcon` | Glyphs and brand marks. Use `LinkIcon` for 14px clickable-link categories. |
 | `FileTypeIcon`, `classifyFileType`, `fileExtension` | A category-colored 28px file or folder glyph and the shared case-insensitive filename mapping behind it. Code and configuration files use detailed full-color technology glyphs; use `LinkIcon` for link-leading glyphs and image previews for image content. |
@@ -96,7 +96,7 @@ The package enforces one separation: presentational React atoms with zero Cordis
 | File | Role |
 |---|---|
 | [`src/index.ts`](src/index.ts) | Public atom exports |
-| [`src/markdown/`](src/markdown/) | Markdown and math pipeline: micromark parsing, KaTeX typesetting, incremental streaming renderer, `CodeBlock`/`JsonBlock` |
+| [`src/markdown/`](src/markdown/) | Markdown and math pipeline: micromark parsing, KaTeX typesetting, incremental streaming renderer, `CodeBlock`/`JsonBlock`/`MermaidBlock` |
 | [`src/TerminalBlock.tsx`](src/TerminalBlock.tsx) | ANSI escape parsing (`anser`) and terminal card rendering |
 | [`src/ReadBlock.tsx`](src/ReadBlock.tsx) / [`src/DiffBlock.tsx`](src/DiffBlock.tsx) | Read and diff cards |
 | [`src/SearchBlock.tsx`](src/SearchBlock.tsx) / [`src/WebBlock.tsx`](src/WebBlock.tsx) | Search and web-retrieval cards |
@@ -146,6 +146,7 @@ These limits define how the atoms behave at the edges; they are current package 
 
 - **Diff search is bounded, input processing is linear** — the edit-distance limit trades precise alignment for a coarse replacement on heavily changed fragments. Normalization, fallback rows, and copied output still scale with input size; the height cap limits visible rows, not those allocations.
 - **Streaming defers cross-boundary reference resolution** — a reference-style link or footnote whose definition sits on the other side of the incremental freeze boundary renders as literal text while the reply streams; the settled full parse at finalize resolves it.
+- **Mermaid diagrams render only once settled, and the first one pays the lazy import** — a ` ```mermaid ` fence stays a highlighted source fence while the reply streams (incomplete source never flashes render errors), and the heavy `mermaid` module loads behind a dynamic import on first use, so a session with no diagrams pays neither the module nor its initialization. A settled render failure falls back to the source `CodeBlock`.
 - **A long highlighted fence retains its complete token DOM** — streaming avoids re-parsing, re-tokenizing, and reconciling the completed prefix, but it does not discard old colors or virtualize token spans. Final DOM cardinality therefore still follows the fence's token count; nested/container fences and a pathological single long line remain on the general tail path.
 - **Glyph-level icons are redrawn approximations** — the fish logo and the sparkle mark come from font glyphs whose vector geometry is not exportable from the local design data; hand-authored recreations stand in until an exact export path exists.
 - **`Pill` and `Input` have no design source** — both atoms are self-defined; the sidebar search field and view-tab strip that resemble them are consumer-owned compositions, not these atoms.

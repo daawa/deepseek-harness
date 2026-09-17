@@ -35,6 +35,11 @@ export const zh = {
   'json.label': 'JSON',
   'markdown.footnotes': '脚注',
   'markdown.truncatedCharacters': '… 已截断，共 {total} 字符',
+  'markdown.mermaid.error': '无法渲染此图表',
+  'markdown.mermaid.zoomOut': '缩小',
+  'markdown.mermaid.zoomIn': '放大',
+  'markdown.mermaid.resetZoom': '重置缩放',
+  'markdown.mermaid.save': '保存图表',
   'number.thousand': '{value}K',
   'number.million': '{value}M',
 } satisfies Record<string, string>

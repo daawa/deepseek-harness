@@ -6,11 +6,20 @@ import type { ChatViewSlotProps } from './contract/slots.ts'
 /**
  * Build the complete Markdown chrome copy for one locale revision.
  * @param t - Chat locale seat.
- * @returns Labels for code fences and footnotes.
+ * @returns Labels for code fences, footnotes, and Mermaid diagrams.
  */
 export function markdownLabels(t: ChatViewSlotProps['t']): MarkdownLabels {
   return {
     code: { copyLabel: t('copy'), copiedLabel: t('copied') },
     footnotes: t('markdown.footnotes'),
+    mermaid: {
+      error: t('markdown.mermaid.error'),
+      toolbar: {
+        zoomOut: t('markdown.mermaid.zoomOut'),
+        zoomIn: t('markdown.mermaid.zoomIn'),
+        resetZoom: t('markdown.mermaid.resetZoom'),
+        save: t('markdown.mermaid.save'),
+      },
+    },
   }
 }
