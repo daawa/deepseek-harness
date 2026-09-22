@@ -52,7 +52,7 @@ kind: "package-library"
 | `HoverCard` | 指针可停留、可选中的悬停预览；可选带复制按钮。 |
 | `Toast` | 顶部居中的瞬时横幅，保持时长由所有者的 `holdMs` 决定。 |
 | `JsonTree`、`JsonBlock` | 只读 JSON 查看。 |
-| `MarkdownText`、`CodeBlock` | 不可信 GFM 与 TeX 数学，以及高亮代码。`CodeBlock` 可通过 `lineNumbers` 开启行号；复制的源码不含行号栏，`contentRef` 则向需要把稳定源码包装节点用作滚动区的 owner 提供该节点。调用方提供自己的语言与复制工具栏时，设置 `showHeader={false}`。已定型的 ` ```mermaid ` 代码块通过 `MermaidBlock` 渲染为图表，使用 Mermaid 共享布局选择的图表默认采用 ELK 分层布局；渲染失败或 Mermaid 分块始终未加载时回退为源 `CodeBlock`。当 owner 提供 `MarkdownMermaidLabels.toolbar` 时，渲染成功的图表带有缩放（25%–400%，在可滚动视口中以 CSS scale 实现）、重置与另存为 `.svg` 的工具栏。本地化的源码开关显示只读、可复制的 Mermaid 代码，切回时保留原图表的缩放与滚动状态；缩放和保存控件仅在图表视图显示。下载文件通过 XML 序列化保留 XHTML 标签的命名空间与换行。 |
+| `MarkdownText`、`CodeBlock` | 不可信 GFM 与 TeX 数学，以及高亮代码。`CodeBlock` 可通过 `lineNumbers` 开启行号；复制的源码不含行号栏，`contentRef` 则向需要把稳定源码包装节点用作滚动区的 owner 提供该节点。横幅带有默认展开的折叠按钮，由 `collapseLabel`/`expandLabel` 命名。折叠保留源码 DOM 与复制操作，状态属于当前挂载的代码块，并在流式更新期间保持；调用方提供自己的工具栏时，`showHeader={false}` 隐藏这两个控件。已定型的 ` ```mermaid ` 代码块通过 `MermaidBlock` 渲染为图表，使用 Mermaid 共享布局选择的图表默认采用 ELK 分层布局；渲染失败或 Mermaid 分块始终未加载时回退为源 `CodeBlock`。当 owner 提供 `MarkdownMermaidLabels.toolbar` 时，渲染成功的图表带有缩放（25%–400%，在可滚动视口中以 CSS scale 实现）、重置与另存为 `.svg` 的工具栏。本地化的源码开关显示只读、可复制的 Mermaid 代码，切回时保留原图表的缩放与滚动状态；缩放和保存控件仅在图表视图显示。下载文件通过 XML 序列化保留 XHTML 标签的命名空间与换行。 |
 | `TerminalBlock`、`ReadBlock`、`DiffBlock`、`SearchBlock`、`WebBlock` | 与各类工具结果意图对应的 agent 输出卡片。 |
 | `icons/*`、`FishLogo`、`BrandWordmark`、`ReferenceIcon`、`LinkIcon` | 字形与品牌标识。`LinkIcon` 用于 14px 的可点击链接分类。 |
 | `FileTypeIcon`、`classifyFileType`、`fileExtension` | 按类别着色的 28px 文件或文件夹图形，以及它背后共享的不区分大小写文件名映射。代码与配置文件使用细分的全彩技术图形；链接前置图形使用 `LinkIcon`，图片内容使用图片预览。 |

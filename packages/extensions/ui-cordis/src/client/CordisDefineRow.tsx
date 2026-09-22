@@ -146,6 +146,8 @@ export function CordisDefineRow({
                   lang="javascript"
                   copyLabel={t('body.copy')}
                   copiedLabel={t('body.copied')}
+                  collapseLabel={t('collapse')}
+                  expandLabel={t('expand')}
                   className={css.sourceCode}
                 />
               </div>

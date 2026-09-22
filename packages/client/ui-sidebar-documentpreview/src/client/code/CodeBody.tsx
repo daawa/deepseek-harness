@@ -28,6 +28,8 @@ export function CodeBody({ resourceAddress, content, wrap, scrollportRef, t }: C
         lineNumbers
         copyLabel={t('copy')}
         copiedLabel={t('copied')}
+        collapseLabel={t('collapse')}
+        expandLabel={t('expand')}
       />
     </div>
   )

@@ -1,0 +1,6 @@
+- text: Source
+- switch "Source" [checked]
+- text: mermaid
+- button "Expand":
+  - img
+- button "Copy"

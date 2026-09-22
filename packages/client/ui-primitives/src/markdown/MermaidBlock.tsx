@@ -14,6 +14,10 @@ export interface MermaidBlockProps {
   copyLabel: string
   /** Copy-button label during the post-copy confirmation window. */
   copiedLabel: string
+  /** Fold-button accessible label while the code is expanded (click to collapse). */
+  collapseLabel: string
+  /** Fold-button accessible label while the code is collapsed (click to expand). */
+  expandLabel: string
   /**
    * Caption shown above the source block when the diagram fails to render.
    * Optional: a feature that does not localize it still gets the source
@@ -57,7 +61,7 @@ const ZOOM_STEP = 1.25
  * XHTML label namespaces and line breaks. The Source switch shows copyable
  * Mermaid code without discarding the diagram or its zoom and scroll state.
  */
-export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolbar }: MermaidBlockProps) {
+export function MermaidBlock({ source, copyLabel, copiedLabel, collapseLabel, expandLabel, errorLabel, toolbar }: MermaidBlockProps) {
   // Kick the lazy import; the snapshot moves off `loading` when it settles.
   ensureMermaid()
   const loadState = useSyncExternalStore(subscribeMermaidLoaded, mermaidLoadState, mermaidLoadState)
@@ -144,6 +148,8 @@ export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolb
             lang="mermaid"
             copyLabel={copyLabel}
             copiedLabel={copiedLabel}
+            collapseLabel={collapseLabel}
+            expandLabel={expandLabel}
           />}
           <div className={css.viewport} hidden={showSource}>
             <div
@@ -165,12 +171,15 @@ export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolb
             lang="mermaid"
             copyLabel={copyLabel}
             copiedLabel={copiedLabel}
+            collapseLabel={collapseLabel}
+            expandLabel={expandLabel}
           />
         </div>
       )
     }
     return <div className={css.loading} aria-hidden="true" />
-  }, [outcome, loadState, source, copyLabel, copiedLabel, errorLabel, toolbar, zoom, showSource, zoomBy, resetZoom, save])
+  }, [outcome, loadState, source, copyLabel, copiedLabel, collapseLabel, expandLabel, errorLabel, toolbar, zoom,
+    showSource, zoomBy, resetZoom, save])
 
   return <div className={clsx(css.block, 'md-mermaid-block')}>{body}</div>
 }

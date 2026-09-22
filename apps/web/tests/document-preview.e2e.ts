@@ -448,10 +448,17 @@ describe.skipIf(MODE === 'record')('web e2e: document preview through Files', ()
         firstLineAbove: firstLine.getBoundingClientRect().top < clipTop,
       }
     })).toEqual({ scrollTop, scrollportBelowBanner: true, firstLineAbove: true })
+    await codeBlock.getByRole('button', { name: 'Collapse', exact: true }).click()
+    await codeScrollport.waitFor({ state: 'hidden' })
+    expect(await codeScrollport.evaluate(node => getComputedStyle(node).display)).toBe('none')
+    expect(await highlightedLines.count()).toBe(codeLines.length)
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: new URL(page.url()).origin })
     await page.evaluate(() => navigator.clipboard.writeText(''))
     await codeBlock.getByRole('button', { name: 'Copy', exact: true }).click()
     await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(codeLines.join('\n'))
+    await codeBlock.getByRole('button', { name: 'Expand', exact: true }).click()
+    await codeScrollport.waitFor({ state: 'visible' })
+    expect(await highlightedLines.allTextContents()).toEqual(codeLines)
     sections.push([
       '## Code paging', '',
       `- Viewer: ${await viewer.innerText()}`,
@@ -459,6 +466,7 @@ describe.skipIf(MODE === 'record')('web e2e: document preview through Files', ()
       `- Lines: ${prefix.length} -> ${completed.length}`,
       `- Prefix retained: ${String(JSON.stringify(completed.slice(0, prefix.length)) === JSON.stringify(prefix))}`,
       `- Tail: ${completed.at(-1)}`,
+      '- Folded source hidden; full source copied; expanded lines retained.',
     ].join('\n'))
 
     await openFile('notes.unknown')

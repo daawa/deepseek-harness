@@ -30,8 +30,12 @@
   - text: — 随机选中的包：
   - code: packages/context/session-reference
   - text: 📦
+- button "Collapse" [expanded]:
+  - img
 - button "Copy"
 - code: session-reference ├── README.md ├── package.json ├── src │ ├── index.ts │ └── uri.ts └── tests └── session-reference.spec.ts
+- button "Collapse" [expanded]:
+  - img
 - button "Copy"
 - code: "session-reference/ ├── README.md # 包说明文档 ├── package.json # 包元数据与依赖声明 ├── src/ │ ├── index.ts # 入口，导出公共 API │ └── uri.ts # 会话引用 URI 相关实现 └── tests/ └── session-reference.spec.ts # 单元测试"
 - paragraph: 这是一个很典型的轻量 TypeScript 包结构：入口 + 实现 + 测试。这一轮到此结束，等系统开启下一个 turn。
@@ -63,6 +67,8 @@
     - text: — 随机选中
     - code: packages/context/session-reference
     - text: ，输出了文件结构：
+    - button "Collapse" [expanded]:
+      - img
     - button "Copy"
     - code: session-reference/ ├── README.md ├── package.json ├── src/ │ ├── index.ts │ └── uri.ts └── tests/ └── session-reference.spec.ts
   - listitem:
@@ -70,6 +76,8 @@
     - text: — 随机选中
     - code: packages/llm/token-meter
     - text: ，输出了文件结构：
+    - button "Collapse" [expanded]:
+      - img
     - button "Copy"
     - code: token-meter/ ├── README.md ├── package.json ├── src/ │ └── index.ts └── tests/ └── token-meter.spec.ts
 - paragraph:

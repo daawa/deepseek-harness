@@ -1,5 +1,7 @@
 - text: Source
 - switch "Source" [checked]
 - text: mermaid
+- button "Collapse" [expanded]:
+  - img
 - button "Copy"
 - code: graph TD A["Input<br>source"] --> B["Rendered diagram"]

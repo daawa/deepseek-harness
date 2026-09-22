@@ -41,6 +41,7 @@
 - Lines: 64 -> 65
 - Prefix retained: true
 - Tail: const tail = "CODE_TAIL";
+- Folded source hidden; full source copied; expanded lines retained.
 
 ## Unknown suffix
 

@@ -30,12 +30,16 @@ import { LinkIcon, classifyLinkPath } from '../LinkIcon.tsx'
 import type { PositionedBlock } from './incremental.ts'
 import css from './MarkdownText.module.css'
 
-/** Copy-button labels forwarded to fence CodeBlocks (this package is cordis-free, so copy arrives via props). */
+/** Localized copy and fold controls forwarded to fence CodeBlocks. */
 export interface MarkdownCodeLabels {
   /** Copy-button idle label. */
   copyLabel: string
   /** Copy-button label during the post-copy confirmation window. */
   copiedLabel: string
+  /** Fold-button accessible label while the code is expanded (click to collapse). */
+  collapseLabel: string
+  /** Fold-button accessible label while the code is collapsed (click to expand). */
+  expandLabel: string
 }
 
 /** Localized chrome for a Markdown document. */
@@ -408,6 +412,8 @@ function renderCode(node: Md.Code, key: Key, context: MarkdownRenderContext): Re
         source={node.value}
         copyLabel={context.labels.code.copyLabel}
         copiedLabel={context.labels.code.copiedLabel}
+        collapseLabel={context.labels.code.collapseLabel}
+        expandLabel={context.labels.code.expandLabel}
         errorLabel={context.labels.mermaid?.error}
         toolbar={context.labels.mermaid?.toolbar}
       />
@@ -429,6 +435,8 @@ function renderCode(node: Md.Code, key: Key, context: MarkdownRenderContext): Re
       streaming={context.streaming}
       copyLabel={context.labels.code.copyLabel}
       copiedLabel={context.labels.code.copiedLabel}
+      collapseLabel={context.labels.code.collapseLabel}
+      expandLabel={context.labels.code.expandLabel}
     />
   )
 }

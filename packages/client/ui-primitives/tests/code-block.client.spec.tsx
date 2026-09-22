@@ -7,7 +7,7 @@ import { CodeBlock as LocalizedCodeBlock } from '../src/markdown/CodeBlock.tsx'
 import { highlightToHtml, subscribeGrammarLoaded } from '../src/markdown/highlight.ts'
 import { markdownLabels } from './labels.client.ts'
 
-function CodeBlock(props: Omit<ComponentProps<typeof LocalizedCodeBlock>, 'copyLabel' | 'copiedLabel'>) {
+function CodeBlock(props: Omit<ComponentProps<typeof LocalizedCodeBlock>, 'copyLabel' | 'copiedLabel' | 'collapseLabel' | 'expandLabel'>) {
   return <LocalizedCodeBlock {...props} {...markdownLabels.code} />
 }
 
@@ -79,7 +79,10 @@ describe('CodeBlock', () => {
     expect(view.container.querySelector('[data-line-numbers]')).toBeNull()
   })
 
-  it.each(['ts', 'unregistered'])('numbers %s source lines without copying the gutter', async (lang) => {
+  it.each([
+    { lang: 'ts', folded: false }, { lang: 'unregistered', folded: false },
+    { lang: 'ts', folded: true }, { lang: 'unregistered', folded: true },
+  ])('copies full $lang source without the gutter (folded: $folded)', async ({ lang, folded }) => {
     const clipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard')
     const writeText = vi.fn().mockResolvedValue(undefined)
     vi.useFakeTimers()
@@ -91,6 +94,7 @@ describe('CodeBlock', () => {
       expect([...view.container.querySelectorAll('code > .line')].map(line => line.textContent))
         .toEqual(['const first = 1', '', 'const last = 3'])
       expect(view.container.querySelector('pre')!.textContent).toBe(code)
+      if (folded) fireEvent.click(view.getByRole('button', { name: '收起' }))
       await act(async () => { fireEvent.click(view.getByRole('button', { name: '复制' })) })
       expect(writeText).toHaveBeenCalledWith(code)
       await act(async () => { await vi.runOnlyPendingTimersAsync() })
@@ -131,6 +135,43 @@ describe('CodeBlock', () => {
     const view = render(<CodeBlock code="plain text" />)
     expect(view.container.querySelector('pre.shiki')).toBeNull()
     expect(view.getByText('plain text')).toBeTruthy()
+  })
+
+  it('folds and unfolds the code body through the banner toggle', () => {
+    const view = render(<CodeBlock code={'const a = 1\n'} lang="ts" />)
+    const content = view.container.querySelector('[data-code-block-content]')!
+    expect(content.hasAttribute('hidden')).toBe(false)
+    const fold = view.getByRole('button', { name: '收起' })
+    expect(fold.getAttribute('aria-expanded')).toBe('true')
+    fireEvent.click(fold)
+    expect(content.hasAttribute('hidden')).toBe(true)
+    expect(view.container.querySelector('[data-folded]')).not.toBeNull()
+    const unfold = view.getByRole('button', { name: '展开' })
+    expect(unfold.getAttribute('aria-expanded')).toBe('false')
+    fireEvent.click(unfold)
+    expect(content.hasAttribute('hidden')).toBe(false)
+    expect(view.container.querySelector('[data-folded]')).toBeNull()
+  })
+
+  it.each(['ts', 'unregistered'])('keeps %s source folded across streaming growth and settlement', (lang) => {
+    const view = render(<CodeBlock code={'const first = 1\n'} lang={lang} streaming />)
+    const content = view.container.querySelector('[data-code-block-content]')!
+    fireEvent.click(view.getByRole('button', { name: '收起' }))
+    const code = 'const first = 1\nconst second = 2\n'
+    view.rerender(<CodeBlock code={code} lang={lang} streaming />)
+    expect(content.hasAttribute('hidden')).toBe(true)
+    view.rerender(<CodeBlock code={code} lang={lang} />)
+    expect(view.container.querySelector('[data-code-block-content]')).toBe(content)
+    expect(content.hasAttribute('hidden')).toBe(true)
+    fireEvent.click(view.getByRole('button', { name: '展开' }))
+    expect(content.hasAttribute('hidden')).toBe(false)
+    expect(content.querySelector('pre')!.textContent).toBe(code.slice(0, -1))
+  })
+
+  it('omits the fold toggle when the caller supplies its own toolbar', () => {
+    const view = render(<CodeBlock code="plain body" showHeader={false} />)
+    expect(view.queryByRole('button', { name: '收起' })).toBeNull()
+    expect(view.queryByRole('button', { name: '展开' })).toBeNull()
   })
 
   it('shows the language banner and copies the pre textContent', async () => {

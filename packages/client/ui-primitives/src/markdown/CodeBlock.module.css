@@ -57,6 +57,29 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  gap: 8px;
+}
+
+.foldButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(255 255 255 / 0);
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.foldIcon {
+  transition: transform 0.15s ease;
+}
+
+/* Expanded points the chevron up (click to collapse); folded points it down. */
+.block:not([data-folded]) .foldIcon {
+  transform: rotate(180deg);
 }
 
 .copyButton {
@@ -73,6 +96,23 @@
    the default CodeBlock layout. */
 .content {
   display: contents;
+}
+
+/* Hidden content stays hidden even when an owner supplies scrollport display styles. */
+.content[hidden] {
+  display: none !important;
+}
+
+/* A folded block keeps the banner but drops the code body; the banner's
+   bottom corners then carry the block's radius. */
+.block[data-folded] .bannerWrap {
+  border-bottom-left-radius: var(--dsl-code-block-border-radius);
+  border-bottom-right-radius: var(--dsl-code-block-border-radius);
+}
+
+.block[data-folded] .banner {
+  border-bottom-left-radius: var(--dsl-code-block-border-radius);
+  border-bottom-right-radius: var(--dsl-code-block-border-radius);
 }
 
 .block :where(pre) {
