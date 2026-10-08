@@ -3,7 +3,7 @@
 // append-only rerenders must show, at every step, exactly the DOM a fresh
 // mount of the same prefix shows, while reusing the frozen blocks' DOM nodes
 // instead of remounting them.
-import { cleanup, fireEvent, render } from '@testing-library/react'
+import { cleanup, render } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import type { Root, RootContent } from 'mdast'
 import { MarkdownText } from './markdown-test-components.tsx'
@@ -93,18 +93,16 @@ describe('incremental streaming rendering', () => {
     fresh.unmount()
   })
 
-  it('updates frozen code controls when the localized labels change identity', () => {
+  it('drops the streaming cache when the copy labels change identity', () => {
     const doc = ['```ts', 'const a = 1', '```', '', 'p1', '', 'p2', '', 'p3'].join('\n')
     const live = render(
-      <MarkdownText text={doc} streaming codeLabels={{ copyLabel: 'Copy', copiedLabel: 'Copied', collapseLabel: 'Collapse', expandLabel: 'Expand' }} />,
+      <MarkdownText text={doc} streaming codeLabels={{ copyLabel: 'Copy', copiedLabel: 'Copied' }} />,
     )
-    expect(live.getByRole('button', { name: 'Copy' })).toBeTruthy()
-    expect(live.getByRole('button', { name: 'Collapse' })).toBeTruthy()
+    expect([...live.container.querySelectorAll('button')].map(b => b.textContent)).toEqual(['Copy'])
     live.rerender(
-      <MarkdownText text={doc} streaming codeLabels={{ copyLabel: 'Kopieren', copiedLabel: 'Kopiert', collapseLabel: 'Einklappen', expandLabel: 'Ausklappen' }} />,
+      <MarkdownText text={doc} streaming codeLabels={{ copyLabel: 'Kopieren', copiedLabel: 'Kopiert' }} />,
     )
-    expect(live.getByRole('button', { name: 'Kopieren' })).toBeTruthy()
-    expect(live.getByRole('button', { name: 'Einklappen' })).toBeTruthy()
+    expect([...live.container.querySelectorAll('button')].map(b => b.textContent)).toEqual(['Kopieren'])
     live.unmount()
   })
 
@@ -118,26 +116,6 @@ describe('incremental streaming rendering', () => {
     expect(live.container.querySelector('.katex')).not.toBeNull()
     live.unmount()
     settled.unmount()
-  })
-
-  it('keeps an open fence folded through growth, freezing, and settlement', () => {
-    const prefix = 'before.\n\n```ts\nconst first = 1\n'
-    const live = render(<MarkdownText text={prefix} streaming />)
-    const content = live.container.querySelector('[data-code-block-content]')!
-    fireEvent.click(live.getByRole('button', { name: '收起' }))
-    const grown = `${prefix}const second = 2\n`
-    live.rerender(<MarkdownText text={grown} streaming />)
-    expect(content.hasAttribute('hidden')).toBe(true)
-    const closed = `${grown}\x60\x60\x60\n\nafter.\n\nmore.\n\nlast.`
-    live.rerender(<MarkdownText text={closed} streaming />)
-    expect(live.container.querySelector('[data-code-block-content]')).toBe(content)
-    expect(content.hasAttribute('hidden')).toBe(true)
-    live.rerender(<MarkdownText text={closed} />)
-    expect(live.container.querySelector('[data-code-block-content]')).toBe(content)
-    expect(content.hasAttribute('hidden')).toBe(true)
-    fireEvent.click(live.getByRole('button', { name: '展开' }))
-    expect(content.hasAttribute('hidden')).toBe(false)
-    expect(content.querySelector('pre')!.textContent).toBe('const first = 1\nconst second = 2')
   })
 
   it('keeps a highlighted fence mounted across the final full-document parse', () => {

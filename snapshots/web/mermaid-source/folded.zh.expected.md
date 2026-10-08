@@ -1,6 +1,0 @@
-- text: 源码
-- switch "源码" [checked]
-- text: mermaid
-- button "展开":
-  - img
-- button "复制"

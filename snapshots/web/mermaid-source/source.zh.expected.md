@@ -1,7 +1,5 @@
 - text: 源码
 - switch "源码" [checked]
 - text: mermaid
-- button "收起" [expanded]:
-  - img
 - button "复制"
 - code: graph TD A["Input<br>source"] --> B["Rendered diagram"]

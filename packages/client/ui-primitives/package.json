@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-primitives",
   "description": "Pure React atoms for the dsh web UI: controls, icons, markdown, and JSON inspectors (zero cordis)",
-  "version": "0.1.6-alpha.1",
+  "version": "0.2.1-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -23,12 +23,15 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@mermaid-js/layout-elk": "0.2.0",
-    "@shikijs/langs": "^4.3.1",
-    "@types/mdast": "^4.0.4",
+    "@deepseek-ai/cordis": "workspace:~",
+    "@deepseek-ai/dsh-client-store": "workspace:*",
     "@types/react": "~18.3.1",
     "@types/react-dom": "~18.3.0",
+    "@deepseek-ai/dsh-util-code-language": "workspace:*",
+    "@deepseek-ai/dsh-util-workspace-path": "workspace:*",
+    "@shikijs/langs": "^4.3.1",
+    "@types/mdast": "^4.0.4",
+    "@mermaid-js/layout-elk": "0.2.0",
     "anser": "^2.3.5",
     "clsx": "^2.0.0",
     "diff": "^9.0.0",
@@ -48,7 +51,8 @@
     "micromark-util-types": "^2.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "shiki": "^4.3.1"
+    "shiki": "^4.3.1",
+    "simple-icons": "16.31.0"
   },
   "files": [
     "lib/index.js",
@@ -56,6 +60,6 @@
     "lib/types/**/*.d.ts"
   ],
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:^"
+    "@deepseek-ai/cordis": "workspace:~"
   }
 }

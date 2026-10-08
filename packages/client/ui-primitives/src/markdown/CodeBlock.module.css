@@ -3,7 +3,7 @@
 
 .block {
   --dsl-code-block-banner-background-color: var(--dsw-alias-markdown-code-block-banner);
-  --dsl-code-block-border-radius: 12px;
+  --dsl-code-block-border-radius: var(--dsw-radius-lg);
   /* Local 11/18 instead of the shared --dsw-font-xs-13: the banner scales
      with the markdown 0.875 ladder without shrinking every other xs-13 use. */
   --dsl-code-block-banner-font: 11px/18px var(--dsw-font-family);
@@ -57,29 +57,6 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  gap: 8px;
-}
-
-.foldButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgb(255 255 255 / 0);
-  border: none;
-  padding: 0;
-  margin: 0;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-}
-
-.foldIcon {
-  transition: transform 0.15s ease;
-}
-
-/* Expanded points the chevron up (click to collapse); folded points it down. */
-.block:not([data-folded]) .foldIcon {
-  transform: rotate(180deg);
 }
 
 .copyButton {
@@ -96,23 +73,6 @@
    the default CodeBlock layout. */
 .content {
   display: contents;
-}
-
-/* Hidden content stays hidden even when an owner supplies scrollport display styles. */
-.content[hidden] {
-  display: none !important;
-}
-
-/* A folded block keeps the banner but drops the code body; the banner's
-   bottom corners then carry the block's radius. */
-.block[data-folded] .bannerWrap {
-  border-bottom-left-radius: var(--dsl-code-block-border-radius);
-  border-bottom-right-radius: var(--dsl-code-block-border-radius);
-}
-
-.block[data-folded] .banner {
-  border-bottom-left-radius: var(--dsl-code-block-border-radius);
-  border-bottom-right-radius: var(--dsl-code-block-border-radius);
 }
 
 .block :where(pre) {
@@ -142,6 +102,21 @@
 
 .plain {
   color: var(--dsw-alias-label-primary);
+}
+
+.card :where(pre) {
+  padding: 6px 22px 20px;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.card[data-code-wrap='false'] {
+  --dsl-code-block-line-white-space: pre;
+}
+
+.card[data-code-wrap='false'] :where(pre) {
+  white-space: pre;
+  overflow-wrap: normal;
 }
 
 .numbered :where(pre) code {

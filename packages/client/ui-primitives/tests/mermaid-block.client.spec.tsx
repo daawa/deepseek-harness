@@ -31,7 +31,7 @@ describe('MermaidBlock', () => {
   it('renders the diagram SVG once Mermaid resolves', async () => {
     renderMermaidMock.mockResolvedValue({ svg: '<svg data-testid="diagram"><text>flowchart</text></svg>', diagramType: 'flowchart' })
     const { container } = render(
-      <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" errorLabel="Could not render" />,
+      <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" errorLabel="Could not render" />,
     )
     await waitFor(() => {
       expect(container.querySelector('.md-mermaid-block svg')).not.toBeNull()
@@ -43,7 +43,7 @@ describe('MermaidBlock', () => {
   it('falls back to the labeled source block when rendering fails', async () => {
     renderMermaidMock.mockRejectedValue(new Error('parse error'))
     const { container } = render(
-      <MermaidBlock source="not a diagram" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" errorLabel="Could not render this diagram" />,
+      <MermaidBlock source="not a diagram" copyLabel="Copy" copiedLabel="Copied" errorLabel="Could not render this diagram" />,
     )
     await waitFor(() => {
       expect(screen.getByText('Could not render this diagram')).toBeTruthy()
@@ -57,7 +57,7 @@ describe('MermaidBlock', () => {
   it('omits the error caption when no error label is provided, but keeps the source fallback', async () => {
     renderMermaidMock.mockRejectedValue(new Error('parse error'))
     const { container } = render(
-      <MermaidBlock source="not a diagram" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" />,
+      <MermaidBlock source="not a diagram" copyLabel="Copy" copiedLabel="Copied" />,
     )
     await waitFor(() => {
       expect(container.querySelector('.md-code-block')).not.toBeNull()
@@ -68,7 +68,7 @@ describe('MermaidBlock', () => {
   it('falls back to the source block when the Mermaid chunk never loads', () => {
     vi.mocked(mermaidLoadState).mockReturnValue('failed')
     const { container } = render(
-      <MermaidBlock source="not a diagram" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" errorLabel="Could not load diagram" />,
+      <MermaidBlock source="not a diagram" copyLabel="Copy" copiedLabel="Copied" errorLabel="Could not load diagram" />,
     )
     expect(screen.getByText('Could not load diagram')).toBeTruthy()
     expect(container.querySelector('.md-code-block')).not.toBeNull()
@@ -79,13 +79,13 @@ describe('MermaidBlock', () => {
   it('renders a distinct source only once', async () => {
     renderMermaidMock.mockResolvedValue({ svg: '<svg></svg>', diagramType: 'flowchart' })
     const { rerender } = render(
-      <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" />,
+      <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" />,
     )
     await waitFor(() => {
       expect(renderMermaidMock).toHaveBeenCalledTimes(1)
     })
     // A re-render with the same source must not re-run Mermaid.
-    rerender(<MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" />)
+    rerender(<MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" />)
     await waitFor(() => {
       expect(renderMermaidMock).toHaveBeenCalledTimes(1)
     })
@@ -97,7 +97,7 @@ describe('MermaidBlock', () => {
     async function renderWithToolbar(svg = '<svg viewBox="0 0 100 40"><text>diagram</text></svg>') {
       renderMermaidMock.mockResolvedValue({ svg, diagramType: 'flowchart' })
       const rendered = render(
-        <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" toolbar={toolbar} />,
+        <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" toolbar={toolbar} />,
       )
       await waitFor(() => {
         expect(rendered.container.querySelector('.md-mermaid-block svg')).not.toBeNull()
@@ -117,7 +117,7 @@ describe('MermaidBlock', () => {
     it('omits the toolbar when no labels are provided', async () => {
       renderMermaidMock.mockResolvedValue({ svg: '<svg><text>diagram</text></svg>', diagramType: 'flowchart' })
       const { container } = render(
-        <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" />,
+        <MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" />,
       )
       await waitFor(() => {
         expect(container.querySelector('.md-mermaid-block svg')).not.toBeNull()
@@ -130,7 +130,7 @@ describe('MermaidBlock', () => {
       renderMermaidMock.mockResolvedValue({ svg: '<svg role="img" aria-label="diagram"><text>diagram</text></svg>', diagramType: 'flowchart' })
       const source = 'graph TD\n  A["<b>literal</b>"] --> B\n\n'
       const { container } = render(
-        <MermaidBlock source={source} copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" toolbar={{ ...toolbar, source: label }} />,
+        <MermaidBlock source={source} copyLabel="Copy" copiedLabel="Copied" toolbar={{ ...toolbar, source: label }} />,
       )
       const diagram = await screen.findByRole('img', { name: 'diagram' })
       const toggle = screen.getByRole('switch', { name: label, checked: false })
@@ -159,7 +159,7 @@ describe('MermaidBlock', () => {
       try {
         Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
         renderMermaidMock.mockResolvedValue({ svg: '<svg><text>diagram</text></svg>', diagramType: 'flowchart' })
-        render(<MermaidBlock source={source} copyLabel="Copy" copiedLabel="Copied" collapseLabel="Collapse" expandLabel="Expand" toolbar={toolbar} />)
+        render(<MermaidBlock source={source} copyLabel="Copy" copiedLabel="Copied" toolbar={toolbar} />)
         fireEvent.click(await screen.findByRole('switch', { name: 'Source' }))
         vi.useFakeTimers()
         await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Copy' })) })

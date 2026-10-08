@@ -1,12 +1,8 @@
-- button "Zoom out":
-  - img
+- button "Zoom out"
 - text: 125%
-- button "Zoom in":
-  - img
-- button "Reset zoom":
-  - img
-- button "Save diagram":
-  - img
+- button "Zoom in"
+- button "Reset zoom"
+- button "Save diagram"
 - text: Source
 - switch "Source"
 - document:

@@ -15,8 +15,8 @@ import { saveFailureShot } from './support.ts'
 const SNAPSHOT_DIR = fileURLToPath(new URL('../../../snapshots/web/mermaid-source', import.meta.url))
 const MODE = webSnapshotMode()
 const CASES = [
-  { locale: 'en-US', name: 'en', source: 'Source', zoomIn: 'Zoom in', copy: 'Copy', copied: 'Copied', collapse: 'Collapse', expand: 'Expand' },
-  { locale: 'zh-CN', name: 'zh', source: '源码', zoomIn: '放大', copy: '复制', copied: '复制成功', collapse: '收起', expand: '展开' },
+  { locale: 'en-US', name: 'en', source: 'Source', zoomIn: 'Zoom in', copy: 'Copy', copied: 'Copied' },
+  { locale: 'zh-CN', name: 'zh', source: '源码', zoomIn: '放大', copy: '复制', copied: '复制成功' },
 ]
 
 describe.skipIf(MODE === 'record').each(CASES)('web e2e: Mermaid source ($name)', (labels) => {
@@ -75,23 +75,9 @@ describe.skipIf(MODE === 'record').each(CASES)('web e2e: Mermaid source ($name)'
     await compareOrRefreshGolden(join(SNAPSHOT_DIR, `source.${labels.name}.expected.md`),
       await captureStableAria(page, '.md-mermaid-block', scaffold.workspaceCwd), MODE)
     const source = await block.locator('pre').textContent()
-    const collapse = block.getByRole('button', { name: labels.collapse, exact: true })
-    await collapse.focus()
-    await collapse.press('Space')
-    await block.locator('pre').waitFor({ state: 'hidden' })
-    expect(await block.locator('[data-code-block-content]').evaluate(node => getComputedStyle(node).display)).toBe('none')
-    expect(await block.locator('pre').textContent()).toBe(source)
-    await compareOrRefreshGolden(join(SNAPSHOT_DIR, `folded.${labels.name}.expected.md`),
-      await captureStableAria(page, '.md-mermaid-block', scaffold.workspaceCwd), MODE)
     await block.getByRole('button', { name: labels.copy, exact: true }).click()
     await block.getByRole('button', { name: labels.copied, exact: true }).waitFor()
     expect(await page.evaluate(async () => navigator.clipboard.readText())).toBe(source)
-    const expand = block.getByRole('button', { name: labels.expand, exact: true })
-    expect(await expand.getAttribute('aria-expanded')).toBe('false')
-    await expand.focus()
-    await expand.press('Enter')
-    await block.locator('pre').waitFor({ state: 'visible' })
-    expect(await block.locator('pre').textContent()).toBe(source)
 
     await toggle.focus()
     await toggle.press('Enter')
@@ -115,6 +101,6 @@ afterAll(async () => {
   if (MODE === 'record') return
   await assertFixtureInventory(SNAPSHOT_DIR, [
     'session.v3.jsonl', 'diagram.en.expected.md', 'source.en.expected.md',
-    'diagram.zh.expected.md', 'source.zh.expected.md', 'folded.en.expected.md', 'folded.zh.expected.md',
+    'diagram.zh.expected.md', 'source.zh.expected.md',
   ])
 })

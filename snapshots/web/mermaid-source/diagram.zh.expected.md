@@ -1,12 +1,8 @@
-- button "缩小":
-  - img
+- button "缩小"
 - text: 125%
-- button "放大":
-  - img
-- button "重置缩放":
-  - img
-- button "保存图表":
-  - img
+- button "放大"
+- button "重置缩放"
+- button "保存图表"
 - text: 源码
 - switch "源码"
 - document:

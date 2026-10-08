@@ -2,12 +2,12 @@ import { Fragment, useCallback, useMemo, useRef, useState, useSyncExternalStore 
 import type { CSSProperties, ReactNode, Ref } from 'react'
 import clsx from 'clsx'
 import { writeClipboard } from '../clipboard.ts'
+import { CodeToolbar, type CodeToolbarLabels } from '../CodeToolbar.tsx'
 import {
   StreamingHighlightSession, grammarLoadCount, highlightToHtml, subscribeGrammarLoaded,
 } from './highlight.ts'
 import type { HighlightSpan, StreamingHighlightFrame } from './highlight.ts'
 import { useViewportHighlighting } from './useViewportHighlighting.ts'
-import { IconChevronDownOutline14 } from '../icons/index.tsx'
 import css from './CodeBlock.module.css'
 
 export interface CodeBlockProps {
@@ -30,16 +30,16 @@ export interface CodeBlockProps {
   contentRef?: Ref<HTMLDivElement> | undefined
   /** Show a numbered gutter without adding numbers to copied source. Defaults to false. */
   lineNumbers?: boolean | undefined
-  /** Show the language, fold, and copy header; false when the caller supplies a toolbar. Defaults to true. */
+  /** Show the language and copy header; false when the caller supplies a toolbar. Defaults to true. */
   showHeader?: boolean | undefined
   /** Copy-button idle label; the owner passes localized copy (this package is cordis-free, so copy arrives via props). */
   copyLabel: string
   /** Copy-button label during the post-copy confirmation window. */
   copiedLabel: string
-  /** Fold-button accessible label while the code is expanded (click to collapse). */
-  collapseLabel: string
-  /** Fold-button accessible label while the code is collapsed (click to expand). */
-  expandLabel: string
+  /** Enable the shared card toolbar and spacing; omit for custom toolbar layouts. */
+  toolbarLabels?: CodeToolbarLabels | undefined
+  /** With toolbarLabels, use the owner's wrapping preference and omit the toolbar's local wrap action. */
+  wrap?: boolean | undefined
 }
 
 /**
@@ -69,8 +69,7 @@ function renderLine(line: readonly HighlightSpan[], index: number): ReactNode {
 }
 
 export function CodeBlock({
-  code, lang, streaming, className, contentRef, lineNumbers = false, showHeader = true, copyLabel, copiedLabel,
-  collapseLabel, expandLabel,
+  code, lang, streaming, className, contentRef, lineNumbers = false, showHeader = true, copyLabel, copiedLabel, toolbarLabels, wrap,
 }: CodeBlockProps) {
   const trimmed = code.endsWith('\n') ? code.slice(0, -1) : code
   const sourceLines = lineNumbers ? trimmed.split('\n') : undefined
@@ -155,9 +154,8 @@ export function CodeBlock({
     [streaming, highlighting, streamedBody, trimmed, lang, loaded],
   )
   const [copied, setCopied] = useState(false)
-  const [folded, setFolded] = useState(false)
-
-  const onToggleFold = useCallback(() => { setFolded(value => !value) }, [])
+  const [localWrapped, setWrapped] = useState(true)
+  const wrapped = wrap ?? localWrapped
 
   const onCopy = useCallback(() => {
     if (copied) return
@@ -187,34 +185,28 @@ export function CodeBlock({
       )
 
   return (
-    <div ref={rootRef} className={clsx(css.block, 'md-code-block', lineNumbers && css.numbered, className)}
+    <div ref={rootRef} className={clsx(css.block, 'md-code-block', lineNumbers && css.numbered, toolbarLabels !== undefined && css.card, className)}
       data-line-numbers={lineNumbers || undefined}
-      data-folded={folded || undefined}
+      data-code-wrap={toolbarLabels === undefined ? undefined : wrapped}
       style={sourceLines === undefined ? undefined : {
         '--dsl-code-block-line-number-width': `${Math.max(2, String(sourceLines.length).length)}ch`,
       } as CSSProperties}>
       {/* These paired attributes are stable semantic hooks for owner styling and DOM tests. */}
       {showHeader && <div className={css.bannerWrap}>
-        <div className={css.banner} data-code-block-banner>
+        {toolbarLabels !== undefined ? <CodeToolbar
+          lang={lang} labels={toolbarLabels} copyLabel={copyLabel} copiedLabel={copiedLabel}
+          copied={copied} wrapped={wrapped} onCopy={onCopy}
+          onWrap={wrap === undefined ? () => { setWrapped(value => !value) } : undefined}
+        /> : <div className={css.banner} data-code-block-banner>
           <div className={css.infostring}>{lang ?? ''}</div>
           <div className={css.action}>
-            <button
-              type="button"
-              className={css.foldButton}
-              aria-expanded={!folded}
-              aria-label={folded ? expandLabel : collapseLabel}
-              title={folded ? expandLabel : collapseLabel}
-              onClick={onToggleFold}
-            >
-              <IconChevronDownOutline14 className={css.foldIcon} />
-            </button>
             <button type="button" className={css.copyButton} onClick={onCopy}>
               {copied ? copiedLabel : copyLabel}
             </button>
           </div>
-        </div>
+        </div>}
       </div>}
-      <div ref={contentRef} className={css.content} data-code-block-content hidden={folded}>{body}</div>
+      <div ref={contentRef} className={css.content} data-code-block-content>{body}</div>
     </div>
   )
 }
