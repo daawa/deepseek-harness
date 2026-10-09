@@ -36,7 +36,7 @@ import { ImagePreview } from '../ImagePreview.tsx'
 import type { PositionedBlock } from './incremental.ts'
 import css from './MarkdownText.module.css'
 
-/** Localized copy and fold controls forwarded to fence CodeBlocks. */
+/** Localized copy and toolbar controls forwarded to fence CodeBlocks. */
 export interface MarkdownCodeLabels {
   /** Copy-button idle label. */
   copyLabel: string

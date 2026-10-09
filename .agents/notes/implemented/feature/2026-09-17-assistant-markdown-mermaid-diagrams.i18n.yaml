@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-17-assistant-markdown-mermaid-diagrams.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-17-assistant-markdown-mermaid-diagrams.md
-2026-09-17-assistant-markdown-mermaid-diagrams.md: 6e839ba7ed9187522cdde5d989fc6027981627ed
-2026-09-17-assistant-markdown-mermaid-diagrams.zh.md: 40451f6a98f52ba98ffc84c5edca05db464986fd
+/agent-note-assistant-markdown-mermaid-diagrams:
+  en: 1bb1c164b3622f8f
+  zh: 1207c273453d892a
+/agent-note-assistant-markdown-mermaid-diagrams/problem:
+  en: f090cd97d999fd0e
+  zh: 2e7f357196a6a74b
+/agent-note-assistant-markdown-mermaid-diagrams/decision:
+  en: aa75bcd02151e4ec
+  zh: a5110097bdebfa22
+/agent-note-assistant-markdown-mermaid-diagrams/alternatives-considered:
+  en: e17ba09444189cea
+  zh: 5bb066280d813c64
+/agent-note-assistant-markdown-mermaid-diagrams/consequences:
+  en: 74658f476f528c36
+  zh: 2bf01d2303e26e8a

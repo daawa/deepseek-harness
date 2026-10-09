@@ -56,6 +56,8 @@ const ZOOM_STEP = 1.25
  * reset returns to 100%, and save downloads XML-serialized SVG, preserving
  * XHTML label namespaces and line breaks. The Source switch shows copyable
  * Mermaid code without discarding the diagram or its zoom and scroll state.
+ * Results from disposed effects are ignored, including source replacement
+ * and React effect replay.
  */
 export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolbar }: MermaidBlockProps) {
   // Kick the lazy import; the snapshot moves off `loading` when it settles.
@@ -65,15 +67,8 @@ export function MermaidBlock({ source, copyLabel, copiedLabel, errorLabel, toolb
   const [zoom, setZoom] = useState(1)
   const [showSource, setShowSource] = useState(false)
   const diagramRef = useRef<HTMLDivElement>(null)
-  // A diagram renders once per distinct source; a re-render with the same
-  // source must not re-run Mermaid (its output is deterministic), and a new
-  // source discards the prior outcome.
-  const lastSource = useRef<string | null>(null)
-
   useEffect(() => {
     if (loadState !== 'ready') return
-    if (lastSource.current === source) return
-    lastSource.current = source
     let cancelled = false
     setOutcome({ status: 'rendering' })
     renderMermaid(source).then(

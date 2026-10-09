@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { StrictMode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MermaidBlock } from '../src/markdown/MermaidBlock.tsx'
 
@@ -89,6 +90,31 @@ describe('MermaidBlock', () => {
     await waitFor(() => {
       expect(renderMermaidMock).toHaveBeenCalledTimes(1)
     })
+  })
+
+  it('renders after Strict Mode replays an effect with the loader already ready', async () => {
+    vi.mocked(mermaidLoadState).mockReturnValue('ready')
+    renderMermaidMock.mockResolvedValue({ svg: '<svg role="img" aria-label="diagram"/>', diagramType: 'flowchart' })
+    render(<StrictMode><MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" /></StrictMode>)
+    expect(await screen.findByRole('img', { name: 'diagram' })).toBeTruthy()
+  })
+
+  it.each(['resolve', 'reject'] as const)('keeps the current diagram when an obsolete render finishes with %s', async (completion) => {
+    vi.mocked(mermaidLoadState).mockReturnValue('ready')
+    const pending = Promise.withResolvers<Awaited<ReturnType<typeof renderMermaid>>>()
+    renderMermaidMock.mockReturnValueOnce(pending.promise)
+    renderMermaidMock.mockResolvedValue({ svg: '<svg role="img" aria-label="current diagram"/>', diagramType: 'flowchart' })
+    const { rerender } = render(<MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" errorLabel="Failed" />)
+    rerender(<MermaidBlock source="graph TD; C-->D;" copyLabel="Copy" copiedLabel="Copied" errorLabel="Failed" />)
+    const current = await screen.findByRole('img', { name: 'current diagram' })
+    await act(async () => {
+      if (completion === 'resolve') pending.resolve({ svg: '<svg role="img" aria-label="old diagram"/>', diagramType: 'flowchart' })
+      else pending.reject(new Error('obsolete render failed'))
+      await pending.promise.catch(() => undefined)
+    })
+    expect(screen.getByRole('img', { name: 'current diagram' })).toBe(current)
+    expect(screen.queryByRole('img', { name: 'old diagram' })).toBeNull()
+    expect(screen.queryByText('Failed')).toBeNull()
   })
 
   describe('toolbar', () => {
@@ -251,6 +277,18 @@ describe('MermaidBlock', () => {
         if (revokeDescriptor === undefined) Reflect.deleteProperty(URL, 'revokeObjectURL')
         else Object.defineProperty(URL, 'revokeObjectURL', revokeDescriptor)
         anchorClick.mockRestore()
+      }
+    })
+
+    it('does not download when the renderer returns no SVG element', async () => {
+      renderMermaidMock.mockResolvedValue({ svg: '', diagramType: 'flowchart' })
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
+      try {
+        render(<MermaidBlock source="graph TD; A-->B;" copyLabel="Copy" copiedLabel="Copied" toolbar={toolbar} />)
+        fireEvent.click(await screen.findByRole('button', { name: 'Save diagram' }))
+        expect(click).not.toHaveBeenCalled()
+      } finally {
+        click.mockRestore()
       }
     })
   })
